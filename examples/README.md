@@ -1,22 +1,33 @@
 # Snuffer Examples
 
-Examples demonstrating prompt injection detection with snuffer.
+Documented examples of prompt injection attacks and expected snuffer output.
 
-## Running
+## Prerequisites
 
 ```bash
-uv run python -c "
+export ANTHROPIC_API_KEY=sk-ant-...
+uv sync
+```
+
+## Running an example
+
+```python
 import asyncio
 from snuffer.modes.review import run_review
+from snuffer.formatter import format_report
 
-result = asyncio.run(run_review(open('examples/01_direct_injection.txt').read()))
-print(result)
-"
+text = open("examples/fixtures/direct_injection.txt").read()
+result = asyncio.run(run_review(text))
+print(format_report(result))
 ```
 
 ## Examples
 
-- `01_direct_injection.md` — basic "ignore previous instructions" attack
-- `02_base64_payload.md` — base64-encoded malicious instruction
-- `03_homoglyph_attack.md` — Cyrillic lookalike chars
-- `04_multi_step.md` — distributed multi-chunk attack
+| File | Attack type | Mode |
+|------|-------------|------|
+| `01_direct_injection.md` | "ignore previous instructions" | review |
+| `02_base64_payload.md` | base64-encoded malicious command | review |
+| `03_homoglyph_attack.md` | Cyrillic lookalike chars | review |
+| `04_multi_step_attack.md` | Distributed 3-part attack across chunks | review |
+| `05_clean_text.md` | Benign text — zero warnings expected | review |
+| `06_filter_mode.md` | Filter mode removing malicious chunk | filter |
