@@ -1,7 +1,8 @@
 import asyncio
+from typing import Any
 
 import mcp.server.stdio
-from mcp.server import Server
+from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.types import TextContent, Tool
 
@@ -12,7 +13,7 @@ from snuffer.modes.review import run_review
 app = Server("snuffer")
 
 
-@app.list_tools()
+@app.list_tools()  # type: ignore[no-untyped-call, untyped-decorator]
 async def list_tools() -> list[Tool]:
     return [
         Tool(
@@ -62,8 +63,8 @@ async def list_tools() -> list[Tool]:
     ]
 
 
-@app.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[TextContent]:
+@app.call_tool()  # type: ignore[untyped-decorator]
+async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
     if name == "snuff_review":
         result = await run_review(
             text=arguments["text"],
@@ -98,7 +99,8 @@ def main() -> None:
                     server_name="snuffer",
                     server_version="0.1.0",
                     capabilities=app.get_capabilities(
-                        notification_options=None, experimental_capabilities={}
+                        notification_options=NotificationOptions(),
+                        experimental_capabilities={},
                     ),
                 ),
             )

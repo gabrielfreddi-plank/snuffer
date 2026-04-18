@@ -69,7 +69,10 @@ async def review_chunk(
         messages=[{"role": "user", "content": user_message}],
     )
 
-    raw = message.content[0].text if message.content else '{"warnings": []}'
+    from anthropic.types import TextBlock
+
+    first = message.content[0] if message.content else None
+    raw = first.text if isinstance(first, TextBlock) else '{"warnings": []}'
 
     try:
         data = json.loads(raw)
