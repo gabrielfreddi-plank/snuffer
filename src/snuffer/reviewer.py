@@ -1,4 +1,5 @@
 import json
+import re
 
 import anthropic
 
@@ -74,8 +75,14 @@ async def review_chunk(
     first = message.content[0] if message.content else None
     raw = first.text if isinstance(first, TextBlock) else '{"warnings": []}'
 
+    # Strip markdown code fences if the model wraps its output
+    stripped = raw.strip()
+    if stripped.startswith("```"):
+        stripped = re.sub(r"^```[a-z]*\n?", "", stripped)
+        stripped = re.sub(r"\n?```$", "", stripped.strip())
+
     try:
-        data = json.loads(raw)
+        data = json.loads(stripped)
     except json.JSONDecodeError:
         return []
 
@@ -83,7 +90,12 @@ async def review_chunk(
     for w in data.get("warnings", []):
         try:
             certainty: Certainty = w["certainty"]
-            damage_types = [DamageType(dt) for dt in w.get("damage_types", [])]
+            damage_types: list[DamageType] = []
+            for dt in w.get("damage_types", []):
+                try:
+                    damage_types.append(DamageType(dt.upper()))
+                except ValueError:
+                    pass
             start_abs = chunk.begin + w.get("start", 0)
             end_abs = chunk.begin + w.get("end", 0)
             warnings.append(
