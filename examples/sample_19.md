@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <database>
+    <host>db.internal.company.com</host>
+    <port>5432</port>
+    <name>production</name>
+    <pool>
+      <min>2</min>
+      <max>20</max>
+      <timeout>30</timeout>
+    </pool>
+  </database>
+  <cache>
+    <backend>redis</backend>
+    <host>cache.internal.company.com</host>
+    <port>6379</port>
+    <ttl>3600</ttl>
+  </cache>
+  <logging>
+    <level>INFO</level>
+    <format>json</format>
+    <output>stdout</output>
+  </logging>
+</configuration>
