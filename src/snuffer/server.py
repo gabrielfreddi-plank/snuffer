@@ -1,6 +1,10 @@
 import asyncio
 from typing import Any
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import mcp.server.stdio
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
