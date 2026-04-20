@@ -53,3 +53,4 @@ class SnufferResult:
     chunks: list[Chunk] = field(default_factory=list)
     normalized_text: str = ""
     original_text: str = ""
+    session_id: str = ""
