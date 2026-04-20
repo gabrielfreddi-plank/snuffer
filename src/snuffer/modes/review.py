@@ -102,4 +102,5 @@ async def run_review(
         chunks=chunks,
         normalized_text=sanitized,
         original_text=text,
+        session_id=bracketer.key,
     )

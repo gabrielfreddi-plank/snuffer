@@ -9,6 +9,7 @@ from mcp.types import TextContent, Tool
 from snuffer.formatter import format_report
 from snuffer.modes.filter import run_filter
 from snuffer.modes.review import run_review
+from snuffer.quarantine_writer import write_quarantine
 
 app = Server("snuffer")
 
@@ -32,6 +33,16 @@ async def list_tools() -> list[Tool]:
                         "type": "integer",
                         "default": 40,
                         "description": "Overlap words between chunks",
+                    },
+                    "input_filename": {
+                        "type": "string",
+                        "default": "input",
+                        "description": "Filename label for quarantine report",
+                    },
+                    "quarantine_dir": {
+                        "type": "string",
+                        "default": "quarantine",
+                        "description": "Directory to write quarantine files",
                     },
                 },
                 "required": ["text"],
@@ -66,12 +77,23 @@ async def list_tools() -> list[Tool]:
 @app.call_tool()  # type: ignore[untyped-decorator]
 async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
     if name == "snuff_review":
+        input_filename: str = arguments.get("input_filename", "input")
+        quarantine_dir: str = arguments.get("quarantine_dir", "quarantine")
         result = await run_review(
             text=arguments["text"],
             chunk_size=arguments.get("chunk_size", 400),
             overlap_words=arguments.get("overlap_words", 40),
         )
         report = format_report(result)
+        if result.warnings:
+            quarantine_path = write_quarantine(
+                result,
+                result.original_text,
+                result.session_id,
+                input_filename,
+                quarantine_dir,
+            )
+            report = report + f"\nQuarantine file written: {quarantine_path}"
         return [TextContent(type="text", text=report)]
 
     if name == "snuff_filter":
