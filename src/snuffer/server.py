@@ -1,11 +1,8 @@
 import asyncio
 from typing import Any
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 import mcp.server.stdio
+from dotenv import load_dotenv
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 from mcp.types import TextContent, Tool
@@ -14,6 +11,8 @@ from snuffer.formatter import format_report
 from snuffer.modes.filter import run_filter
 from snuffer.modes.review import run_review
 from snuffer.quarantine_writer import write_quarantine
+
+load_dotenv()
 
 app = Server("snuffer")
 
