@@ -90,22 +90,40 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
 
 
 def main() -> None:
-    async def _run() -> None:
-        async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-            await app.run(
-                read_stream,
-                write_stream,
-                InitializationOptions(
-                    server_name="snuffer",
-                    server_version="0.1.0",
-                    capabilities=app.get_capabilities(
-                        notification_options=NotificationOptions(),
-                        experimental_capabilities={},
-                    ),
-                ),
-            )
+    import argparse
 
-    asyncio.run(_run())
+    parser = argparse.ArgumentParser(prog="snuffer")
+    subparsers = parser.add_subparsers(dest="command")
+
+    serve_parser = subparsers.add_parser("serve", help="Run HTTP API server")
+    serve_parser.add_argument("--host", default="0.0.0.0")
+    serve_parser.add_argument("--port", type=int, default=8080)
+    serve_parser.add_argument("--reload", action="store_true")
+
+    args = parser.parse_args()
+
+    if args.command == "serve":
+        import uvicorn
+        from snuffer.api import app as fastapi_app
+
+        uvicorn.run(fastapi_app, host=args.host, port=args.port, reload=args.reload)
+    else:
+        async def _run() -> None:
+            async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+                await app.run(
+                    read_stream,
+                    write_stream,
+                    InitializationOptions(
+                        server_name="snuffer",
+                        server_version="0.1.0",
+                        capabilities=app.get_capabilities(
+                            notification_options=NotificationOptions(),
+                            experimental_capabilities={},
+                        ),
+                    ),
+                )
+
+        asyncio.run(_run())
 
 
 if __name__ == "__main__":
